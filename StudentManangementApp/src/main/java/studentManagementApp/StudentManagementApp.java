@@ -329,9 +329,6 @@ public class StudentManagementApp {
 
 	}
 	
-	
-	
-	
 	// Show students
 	public static void showStudents() {
 		try {

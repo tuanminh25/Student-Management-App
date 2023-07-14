@@ -58,8 +58,8 @@ public class StudentManagementApp {
 	            System.out.println("5. Sort student by name");            
 	            System.out.println("6. Show students");
 	            System.out.println("7. Average GPA of Students > 5");
-	            System.out.println("8. Min Age of Students whose Average GPA of Students > 5");
-	            System.out.println("9. Max Age of Students whose Average GPA of Students > 5");
+	            System.out.println("8. Min Age of Students whose Average GPA of Students > (Average GPA of Students > 5)");
+	            System.out.println("9. Max Age of Students whose Average GPA of Students > (Average GPA of Students > 5)");
 	            System.out.println("10. Average gpa of any input age\n");
 	            System.out.println("0. Exit\n");
 
@@ -506,7 +506,7 @@ public class StudentManagementApp {
 			
 			int min_age = resultSet1.getInt("min_age");
 			
-			System.out.println("\nMin age of student who has greater gpa than 5 is: " + min_age);
+			System.out.println("\nMin age of student who has greater gpa than Average GPA of Students > 5 is: " + min_age);
 			System.out.println();
 			
 			statement.close();
@@ -536,7 +536,7 @@ public class StudentManagementApp {
 			
 			int max_age = resultSet1.getInt("max_age");
 			
-			System.out.println("\nMax age of student who has greater gpa than 5 is: " + max_age);
+			System.out.println("\nMax age of student who has greater gpa than Average GPA of Students > 5 is: " + max_age);
 			System.out.println();
 			
 			statement.close();

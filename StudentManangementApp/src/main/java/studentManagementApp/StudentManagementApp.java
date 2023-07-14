@@ -27,6 +27,8 @@ public class StudentManagementApp {
 	private static String SORT_STUDENTS_BY_GPA_DESC = "SELECT * FROM students ORDER BY gpa DESC";
 	private static String DELETE_STUDENTS_BY_ID = "DELETE FROM students WHERE id = ?";
 	private static String EDIT_STUDENTS_BY_ID = "UPDATE students SET name = ?, age = ?, address = ?, gpa = ? WHERE id = ?";
+	private static String FIND_AVG_STUDENTS_GPA_LARGER_THAN_FIVE = "SELECT AVG(gpa) AS average_gpa FROM students WHERE gpa > 5";
+	
 	private static Connection connection;
 	
 	public static void main (String[] args) {
@@ -55,6 +57,10 @@ public class StudentManagementApp {
 	            System.out.println("4. Sort student by GPA");
 	            System.out.println("5. Sort student by name");            
 	            System.out.println("6. Show students");
+	            System.out.println("7. Average GPA of Students > 5");
+	            System.out.println("8. Min Age of Students whose Average GPA of Students > 5");
+	            System.out.println("9. Max Age of Students whose Average GPA of Students > 5");
+	            System.out.println("10. Average gpa of any input age\n");
 	            System.out.println("0. Exit\n");
 
 	            System.out.print("Your selection: ");
@@ -92,6 +98,26 @@ public class StudentManagementApp {
 	                showStudents();
 	                break;
 
+	                case 7:
+	                // find average gpa of student whose gpa is larger than an input number
+	                findAverageGpaFromGivenNum();
+	                break;
+	                
+	                case 8:
+	                // find average gpa of student whose gpa is larger than an input number
+	                findMinAgeWhereGpaGreaterThan5();
+	                break;
+	                
+	                case 9:
+	                // find average gpa of student whose gpa is larger than an input number
+	                findMaxAgeWhereGpaGreaterThan5();
+	                break;
+	                
+	                case 10:
+	                // find average gpa of student whose gpa is larger than an input number
+                	AvgGpaEachAge(scanner);
+	                break;
+	                
 	                case 0: 
 	                // exit program
 	                exit = true;
@@ -287,11 +313,15 @@ public class StudentManagementApp {
 					preparedStatement2.setInt(5, EditID);
 					preparedStatement2.executeUpdate();
 					System.out.println("\nSuccessfully updated student infor! \n");
+					preparedStatement2.close();
 				} catch (SQLException e) {
 					System.out.println("\nInvalid input ID. Error: " + e);
 					e.printStackTrace();
 				}
 			}
+			
+			
+			Statement.close();
 			
 		} catch (SQLException e) {
 			System.out.println("\nFind Student By ID failed. Error: " + e);
@@ -320,7 +350,7 @@ public class StudentManagementApp {
 			} else {
 				System.out.println("\nInput student ID does not exist !\n");
 			}
-			
+			preparedStatement.close();
 		} catch (SQLException e) {
 			System.out.println("Deletion process failed. Error: " + e);
 			e.printStackTrace();
@@ -432,5 +462,117 @@ public class StudentManagementApp {
 		System.out.println("\n"); 
 	}
 	
+	public static void findAverageGpaFromGivenNum() {
+		try {
+			Statement statement = connection.createStatement();
 	
+			ResultSet resultSet = statement.executeQuery(FIND_AVG_STUDENTS_GPA_LARGER_THAN_FIVE);
+			
+			resultSet.next();
+			System.out.println("\nAverage gpa which is greater than 5 is: " 
+								+ resultSet.getDouble("average_gpa"));
+			
+			
+			System.out.println();
+			
+			statement.close();
+		} catch (SQLException e) {
+			
+			System.out.println("findAvgGpaFromGivenNum error: " + e);
+			e.printStackTrace();
+		}
+	
+		
+		
+	}
+	
+	
+	public static void findMinAgeWhereGpaGreaterThan5() {
+		try {
+			Statement statement = connection.createStatement();
+	
+			ResultSet resultSet = statement.executeQuery(FIND_AVG_STUDENTS_GPA_LARGER_THAN_FIVE);
+			
+			resultSet.next();
+
+			double avg_gpa = resultSet.getDouble("average_gpa");
+			
+			String MinAgeSql = "SELECT MIN(age) AS min_age FROM students WHERE gpa > " + avg_gpa;
+			
+			
+			ResultSet resultSet1 = statement.executeQuery(MinAgeSql);
+			
+			resultSet1.next();
+			
+			int min_age = resultSet1.getInt("min_age");
+			
+			System.out.println("\nMin age of student who has greater gpa than 5 is: " + min_age);
+			System.out.println();
+			
+			statement.close();
+		} catch (SQLException e) {
+			
+			System.out.println("findMinAgeWhereGpaGreaterThan5 error: " + e);
+			e.printStackTrace();
+		}
+	
+	}
+	
+	public static void findMaxAgeWhereGpaGreaterThan5() {
+		try {
+			Statement statement = connection.createStatement();
+	
+			ResultSet resultSet = statement.executeQuery(FIND_AVG_STUDENTS_GPA_LARGER_THAN_FIVE);
+			
+			resultSet.next();
+
+			double avg_gpa = resultSet.getDouble("average_gpa");
+			
+			String MaxAgeSql = "SELECT MAX(age) AS max_age FROM students WHERE gpa > " + avg_gpa;			
+			
+			ResultSet resultSet1 = statement.executeQuery(MaxAgeSql);
+			
+			resultSet1.next();
+			
+			int max_age = resultSet1.getInt("max_age");
+			
+			System.out.println("\nMax age of student who has greater gpa than 5 is: " + max_age);
+			System.out.println();
+			
+			statement.close();
+		} catch (SQLException e) {
+			
+			System.out.println("findMaxAgeWhereGpaGreaterThan5 error: " + e);
+			e.printStackTrace();
+		}
+	
+	}
+	
+	public static void AvgGpaEachAge(Scanner scanner) {
+		try {
+			Statement statement = connection.createStatement();
+	
+			System.out.println("\nInput age: ");
+			
+			int age = scanner.nextInt();
+			
+			String SqlQuerry = "SELECT AVG(gpa) AS average_gpa FROM students WHERE age = " + age;
+			
+			ResultSet resultSet = statement.executeQuery(SqlQuerry);
+			
+			resultSet.next();
+			
+			double avg_gpa = resultSet.getDouble("average_gpa");	
+			
+			System.out.println("\nAverage gpa of student age " + age + " is : " + avg_gpa);
+			System.out.println();
+			
+			statement.close();
+		} catch (SQLException e) {
+			
+			System.out.println("AvgGpaEachAge error: " + e);
+			e.printStackTrace();
+		}
+	
+	}
 }

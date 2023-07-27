@@ -219,7 +219,6 @@ public class StudentManagementApp {
 				// Valid input ID
 				
 				// Get the default information of that student
-				int DefaultID = resultSet.getInt("id");
 				String DefaultName = resultSet.getString("name");
 				int DefaultAge = resultSet.getInt("age");
 				String DefaultAddress = resultSet.getString("address");

@@ -60,7 +60,7 @@ public class StudentManagementApp {
 	            System.out.println("7. Average GPA of Students > 5");
 	            System.out.println("8. Min Age of Students whose Average GPA of Students > (Average GPA of Students > 5)");
 	            System.out.println("9. Max Age of Students whose Average GPA of Students > (Average GPA of Students > 5)");
-	            System.out.println("10. Average gpa of any input age\n");
+	            System.out.println("10. Average gpa of any age\n");
 	            System.out.println("0. Exit\n");
 
 	            System.out.print("Your selection: ");
@@ -115,7 +115,7 @@ public class StudentManagementApp {
 	                
 	                case 10:
 	                // find average gpa of student whose gpa is larger than an input number
-                	AvgGpaEachAge(scanner);
+                	AvgGpaEachAge();
 	                break;
 	                
 	                case 0: 
@@ -548,26 +548,52 @@ public class StudentManagementApp {
 	
 	}
 	
-	public static void AvgGpaEachAge(Scanner scanner) {
+	public static void AvgGpaEachAge() {
 		try {
 			Statement statement = connection.createStatement();
-	
-			System.out.println("\nInput age: ");
+
+			// Get a table of avai ages
 			
-			int age = scanner.nextInt();
+			String AgesQuerry = "SELECT DISTINCT Age FROM students";
 			
-			String SqlQuerry = "SELECT AVG(gpa) AS average_gpa FROM students WHERE age = " + age;
+			ResultSet AgesResultSet = statement.executeQuery(AgesQuerry);
 			
-			ResultSet resultSet = statement.executeQuery(SqlQuerry);
+
 			
-			resultSet.next();
 			
-			double avg_gpa = resultSet.getDouble("average_gpa");	
+			System.out.println("\nAge\tAverage GPA");
 			
-			System.out.println("\nAverage gpa of student age " + age + " is : " + avg_gpa);
-			System.out.println();
+			
+			while (AgesResultSet.next()) {
+		
+				
+				// Calculate average gpa for each age in the table 
+				int age = AgesResultSet.getInt("age");
+				
+				String AvgGpa = "SELECT AVG(GPA) as average_gpa FROM students WHERE age = " + age;
+				
+				Statement AvgStatement = connection.createStatement();
+				
+				ResultSet AvgGpaResultSet = AvgStatement.executeQuery(AvgGpa);
+				
+				AvgGpaResultSet.next();
+				
+				double avg_gpa = AvgGpaResultSet.getDouble("average_gpa");
+				
+				
+				// Print out
+				System.out.printf("%-7d %.1f\n", age, avg_gpa);
+				
+				AvgStatement.close();
+				
+			}
+				
 			
 			statement.close();
+			
+			System.out.println("");
+			
+			
 		} catch (SQLException e) {
 			
 			System.out.println("AvgGpaEachAge error: " + e);

@@ -1,46 +1,47 @@
 package studentManagementApp;
+
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Connection;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Comparator;
 
-public class StudentManagementApp {
+public class StudentManagementAppVer2 {
 	private static final String jdbcURL = "jdbc:h2:./databaseFile";	
 	private static final String username = "sa1";
 	private static final String password = "";
-	private static final String CREATE_TABLE_QUERY = "CREATE TABLE IF NOT EXISTS students (" +
-			"id INT PRIMARY KEY AUTO_INCREMENT," +
-			"name VARCHAR(40), " +
-			"age INT, " +
-			"address VARCHAR(100), " +
-			"gpa DOUBLE" +
-			")";
+	private static final String CREATE_TABLE_QUERY = "CREATE TABLE IF NOT EXISTS students (" 
+														+ "id INT PRIMARY KEY AUTO_INCREMENT," 
+														+ "name VARCHAR(40), " 
+														+ "age INT, " 
+														+ "address VARCHAR(100), " 
+														+ "gpa DOUBLE" 
+														+ ")";
 	
 	private static String ADD_STUDENT = "INSERT INTO students (name, age, address, gpa) VALUES (?, ?, ?, ?)";
 	private static String SHOW_STUDENTS = "SELECT * FROM students";
-	private static String SORT_STUDENTS_BY_NAME_ASC = "SELECT * FROM students ORDER BY name ASC";
-	private static String SORT_STUDENTS_BY_NAME_DESC = "SELECT * FROM students ORDER BY name DESC";
-	private static String SORT_STUDENTS_BY_GPA_ASC = "SELECT * FROM students ORDER BY gpa ASC";
-	private static String SORT_STUDENTS_BY_GPA_DESC = "SELECT * FROM students ORDER BY gpa DESC";
 	private static String DELETE_STUDENTS_BY_ID = "DELETE FROM students WHERE id = ?";
 	private static String EDIT_STUDENTS_BY_ID = "UPDATE students SET name = ?, age = ?, address = ?, gpa = ? WHERE id = ?";
-	private static String FIND_AVG_STUDENTS_GPA_LARGER_THAN_FIVE = "SELECT AVG(gpa) AS average_gpa FROM students WHERE gpa > 5";
+	
 	
 	private static Connection connection;
 	
 	public static void main (String[] args) {
 		menu();
-		
 	}
 	
 	// Menu 
 	public static void menu() {
 		try {
 			connection = DriverManager.getConnection(jdbcURL, username, password);
-			
+		
 			System.out.println("Welcome to Student Management App! \n");
 			
 			Scanner scanner = new Scanner(System.in);
@@ -60,7 +61,7 @@ public class StudentManagementApp {
 	            System.out.println("7. Average GPA of Students > 5");
 	            System.out.println("8. Min Age of Students whose Average GPA of Students > (Average GPA of Students > 5)");
 	            System.out.println("9. Max Age of Students whose Average GPA of Students > (Average GPA of Students > 5)");
-	            System.out.println("10. Average gpa of any age\n");
+	            System.out.println("10. Average gpa in any age\n");
 	            System.out.println("0. Exit\n");
 
 	            System.out.print("Your selection: ");
@@ -100,7 +101,7 @@ public class StudentManagementApp {
 
 	                case 7:
 	                // find average gpa of student whose gpa is larger than an input number
-	                findAverageGpaFromGivenNum();
+	                findAverageGpaLargerThanFive();
 	                break;
 	                
 	                case 8:
@@ -117,9 +118,10 @@ public class StudentManagementApp {
 	                // find average gpa of student whose gpa is larger than an input number
                 	AvgGpaEachAge();
 	                break;
-	                
+               
 	                case 0: 
 	                // exit program
+                	
 	                exit = true;
 	                
 	                break;
@@ -171,11 +173,14 @@ public class StudentManagementApp {
 		scanner.nextLine();
 		System.out.println("Enter Student name: ");
 		String name = scanner.nextLine();
+		
 		System.out.println("Enter Student age: ");
 		int age = scanner.nextInt();
 		scanner.nextLine();
+		
 		System.out.println("Enter Student address: ");
 		String address = scanner.nextLine();
+		
 		System.out.println("Enter Student gpa: ");
 		double gpa = scanner.nextDouble();
 		
@@ -194,6 +199,34 @@ public class StudentManagementApp {
 		}
 	}
 	
+	// Find student data 
+	public static ResultSet FindStudentByID(int ID) {
+		
+		try {
+			Statement Statement = connection.createStatement();
+			
+			ResultSet resultSet =  Statement.executeQuery("SELECT * FROM students");
+			
+			while (resultSet.next()) {
+				int curr_id = resultSet.getInt("id");
+				if (curr_id == ID) {
+					
+					return resultSet;
+				}
+			}
+			
+			
+			Statement.close();
+	
+		} catch (SQLException e) {
+			System.out.println("Find process failed. Error: " + e);
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
+	
 	
 	// Edit student by ID
 	public static void EditStudentByID(Scanner scanner) {
@@ -204,21 +237,17 @@ public class StudentManagementApp {
 		try {
 			Statement Statement = connection.createStatement();
 
-			Statement.executeQuery("SELECT * FROM students WHERE id = " + EditID);
-			
-			ResultSet resultSet =  Statement.executeQuery("SELECT * FROM students WHERE id = " + EditID);
+			ResultSet resultSet = FindStudentByID(EditID);
 			
 			
 			
-			
-			
-			if (!resultSet.next()) {
+			if (resultSet == null) {
 				// Invalid input ID
 				System.out.println("\nInvalid input ID!\n");	
 			} else {
 				// Valid input ID
 				
-				// Get the default information of that student
+				// Get the default information of that student 
 				String DefaultName = resultSet.getString("name");
 				int DefaultAge = resultSet.getInt("age");
 				String DefaultAddress = resultSet.getString("address");
@@ -340,10 +369,13 @@ public class StudentManagementApp {
 		System.out.println("\nEnter student ID to delete: ");
 
 		int DeleteID = scanner.nextInt();
+		
 		try {
 			PreparedStatement preparedStatement = connection.prepareStatement(DELETE_STUDENTS_BY_ID);
 			preparedStatement.setInt(1, DeleteID);
+		
 			int rowUpdated = preparedStatement.executeUpdate();
+			
 			if (rowUpdated > 0) {
 				System.out.println("\nSuccessfully deleted student !\n");
 			} else {
@@ -373,13 +405,36 @@ public class StudentManagementApp {
 		
 	}
 	
+
+	
+	
 	// Sort students by gpa
 	public static void sortStudentGPA(Scanner scanner) {
-
+		
 		try {
 			Statement statement = connection.createStatement();
 			
-			ResultSet resultSet = null;
+			// Create a list of objects of Students' Data
+			List<ManagementAppData> Data = new ArrayList<>();
+			
+			ResultSet AllInfor = statement.executeQuery("SELECT * FROM students");
+
+			
+			while (AllInfor.next()) {
+				ManagementAppData single = new ManagementAppData(
+												AllInfor.getInt("ID"),
+												AllInfor.getString("Name"),
+												AllInfor.getString("Address"),
+												
+												AllInfor.getInt("Age"),
+												AllInfor.getDouble("GPA")
+												);	
+				
+				Data.add(single);
+	
+			}
+					
+
 			while (true) {
 				System.out.println("\n1. Ascending order");
 				System.out.println("2. Descending order");
@@ -387,21 +442,21 @@ public class StudentManagementApp {
 				int choice = scanner.nextInt();
 				
 				if (choice == 1) {
-					resultSet = statement.executeQuery(SORT_STUDENTS_BY_GPA_ASC);
+					Collections.sort(Data, Comparator.comparing(ManagementAppData::getGpa));
 					break;
 				} else if (choice == 2) {
-					resultSet = statement.executeQuery(SORT_STUDENTS_BY_GPA_DESC);
+					Collections.sort(Data, Comparator.comparing(ManagementAppData::getGpa).reversed());
 					break;
 				} else {
 					System.out.println("Please choose 1 or 2 only !");
 				}
 			}
-			
-			
-			
-			
-			printToConsole(resultSet);
-			
+		
+			System.out.println("\nID\tName\t\tAge\tAddress\t\t\tGPA");
+			for (ManagementAppData singleData : Data) {
+				System.out.println(singleData);
+			}
+			System.out.println("\n");
 			statement.close();
 		} catch (SQLException e) {
 			System.out.println("Sort students by name failed. Error: " + e);
@@ -415,8 +470,26 @@ public class StudentManagementApp {
 		try {
 			Statement statement = connection.createStatement();
 
+			List<ManagementAppData> Data = new ArrayList<>();
 			
-			ResultSet resultSet = null;
+			ResultSet AllInfor = statement.executeQuery("SELECT * FROM students");
+
+			
+			while (AllInfor.next()) {
+				ManagementAppData single = new ManagementAppData(
+												AllInfor.getInt("ID"),
+												AllInfor.getString("Name"),
+												AllInfor.getString("Address"),
+												
+												AllInfor.getInt("Age"),
+												AllInfor.getDouble("GPA")
+												);	
+				
+				Data.add(single);
+	
+			}
+			
+
 			while (true) {
 				System.out.println("\n1. Ascending order");
 				System.out.println("2. Descending order");
@@ -424,19 +497,27 @@ public class StudentManagementApp {
 				int choice = scanner.nextInt();
 
 				if (choice == 1) {
-					resultSet = statement.executeQuery(SORT_STUDENTS_BY_NAME_ASC);
+					Collections.sort(Data, Comparator.comparing(ManagementAppData::getName));
 					break;
 				} else if (choice == 2) {
-					resultSet = statement.executeQuery(SORT_STUDENTS_BY_NAME_DESC);
+					Collections.sort(Data, Comparator.comparing(ManagementAppData::getName).reversed());
 					break;
 				} else {
 					System.out.println("Please choose 1 or 2 only !");
 				}
 			}
+
+			
+			System.out.println("\nID\tName\t\tAge\tAddress\t\t\tGPA");
+			
+			for (ManagementAppData singleData : Data) {
+				System.out.println(singleData);
+			}
+			
+			System.out.println("\n");
 			
 			
-			printToConsole(resultSet);
-			
+
 			statement.close();
 		} catch (SQLException e) {
 			System.out.println("Sort students by name failed. Error: " + e);
@@ -461,15 +542,30 @@ public class StudentManagementApp {
 		System.out.println("\n"); 
 	}
 	
-	public static void findAverageGpaFromGivenNum() {
+
+	public static void findAverageGpaLargerThanFive() {
 		try {
 			Statement statement = connection.createStatement();
-	
-			ResultSet resultSet = statement.executeQuery(FIND_AVG_STUDENTS_GPA_LARGER_THAN_FIVE);
 			
-			resultSet.next();
-			System.out.println("\nAverage gpa which is greater than 5 is: " 
-								+ resultSet.getDouble("average_gpa"));
+			ResultSet resultSet = statement.executeQuery("SELECT * FROM students");
+			int counter = 0;
+			double sum = 0;
+			double avg = 0;
+			
+			while(resultSet.next()) {
+				double gpa = resultSet.getDouble("gpa");
+				if (gpa > 5) {
+					counter++;
+					sum = sum + gpa;
+				}
+			};
+			
+			if (counter > 0) {
+				avg = sum / counter;
+			} 
+
+			
+			System.out.println("\nAverage gpa which is greater than 5 is: " + avg);
 			
 			
 			System.out.println();
@@ -488,22 +584,41 @@ public class StudentManagementApp {
 	
 	public static void findMinAgeWhereGpaGreaterThan5() {
 		try {
+			// findAverageGpaLargerThanFive 
 			Statement statement = connection.createStatement();
-	
-			ResultSet resultSet = statement.executeQuery(FIND_AVG_STUDENTS_GPA_LARGER_THAN_FIVE);
 			
-			resultSet.next();
-
-			double avg_gpa = resultSet.getDouble("average_gpa");
+			ResultSet resultSetGpa = statement.executeQuery("SELECT * FROM students");
+			int counter = 0;
+			double sum = 0;
+			double avg_gpa = 0;
 			
-			String MinAgeSql = "SELECT MIN(age) AS min_age FROM students WHERE gpa > " + avg_gpa;
+			while(resultSetGpa.next()) {
+				double gpa = resultSetGpa.getDouble("gpa");
+				if (gpa > 5) {
+					counter++;
+					sum = sum + gpa;
+				}
+			};
 			
+			if (counter > 0) {
+				avg_gpa = sum / counter;
+			} 
 			
-			ResultSet resultSet1 = statement.executeQuery(MinAgeSql);
+			// find min age
+			int min_age = 100;
 			
-			resultSet1.next();
+			ResultSet resultSetAge = statement.executeQuery("SELECT * FROM students");
 			
-			int min_age = resultSet1.getInt("min_age");
+			while (resultSetAge.next()) {
+				double gpa = resultSetAge.getDouble("gpa");
+				int age = resultSetAge.getInt("age");
+				
+				if (gpa >= avg_gpa && age < min_age) {
+					min_age = age;
+				}
+				
+			}
+			
 			
 			System.out.println("\nMin age of student who has greater gpa than Average GPA of Students > 5 is: " + min_age);
 			System.out.println();
@@ -519,21 +634,40 @@ public class StudentManagementApp {
 	
 	public static void findMaxAgeWhereGpaGreaterThan5() {
 		try {
+			// findAverageGpaLargerThanFive 
 			Statement statement = connection.createStatement();
-	
-			ResultSet resultSet = statement.executeQuery(FIND_AVG_STUDENTS_GPA_LARGER_THAN_FIVE);
 			
-			resultSet.next();
-
-			double avg_gpa = resultSet.getDouble("average_gpa");
+			ResultSet resultSetGpa = statement.executeQuery("SELECT * FROM students");
+			int counter = 0;
+			double sum = 0;
+			double avg_gpa = 0;
 			
-			String MaxAgeSql = "SELECT MAX(age) AS max_age FROM students WHERE gpa > " + avg_gpa;			
+			while(resultSetGpa.next()) {
+				double gpa = resultSetGpa.getDouble("gpa");
+				if (gpa > 5) {
+					counter++;
+					sum = sum + gpa;
+				}
+			};
 			
-			ResultSet resultSet1 = statement.executeQuery(MaxAgeSql);
+			if (counter > 0) {
+				avg_gpa = sum / counter;
+			} 
 			
-			resultSet1.next();
+			// find max age
+			int max_age = 0;
 			
-			int max_age = resultSet1.getInt("max_age");
+			ResultSet resultSetAge = statement.executeQuery("SELECT * FROM students");
+			
+			while (resultSetAge.next()) {
+				double gpa = resultSetAge.getDouble("gpa");
+				int age = resultSetAge.getInt("age");
+				
+				if (gpa >= avg_gpa && age > max_age) {
+					max_age = age;
+				}
+				
+			}
 			
 			System.out.println("\nMax age of student who has greater gpa than Average GPA of Students > 5 is: " + max_age);
 			System.out.println();
@@ -551,50 +685,58 @@ public class StudentManagementApp {
 		try {
 			Statement statement = connection.createStatement();
 
-			// Get a table of avai ages
 			
-			String AgesQuerry = "SELECT DISTINCT Age FROM students";
+			List<ManagementAppData> Data = new ArrayList<>();
 			
-			ResultSet AgesResultSet = statement.executeQuery(AgesQuerry);
-			
+			ResultSet AllInfor = statement.executeQuery("SELECT * FROM students");
 
 			
-			
-			System.out.println("\nAge\tAverage GPA");
-			
-			
-			while (AgesResultSet.next()) {
-		
+			while (AllInfor.next()) {
+				ManagementAppData single = new ManagementAppData(
+												AllInfor.getInt("ID"),
+												AllInfor.getString("Name"),
+												AllInfor.getString("Address"),
+												
+												AllInfor.getInt("Age"),
+												AllInfor.getDouble("GPA")
+												);	
 				
-				// Calculate average gpa for each age in the table 
-				int age = AgesResultSet.getInt("age");
-				
-				String AvgGpa = "SELECT AVG(GPA) as average_gpa FROM students WHERE age = " + age;
-				
-				Statement AvgStatement = connection.createStatement();
-				
-				ResultSet AvgGpaResultSet = AvgStatement.executeQuery(AvgGpa);
-				
-				AvgGpaResultSet.next();
-				
-				double avg_gpa = AvgGpaResultSet.getDouble("average_gpa");
-				
-				
-				// Print out
-				System.out.printf("%-7d %.1f\n", age, avg_gpa);
-				
-				AvgStatement.close();
-				
+				Data.add(single);
 			}
+			
+			
+			List<Integer> DistinctAge = Data.stream()
+											.mapToInt(ManagementAppData::getAge)
+											.distinct()
+											.boxed()
+											.sorted()
+											.collect(Collectors.toList());
+
+			System.out.println("\nAge\tAverage GPA");
+	
+			for (int i = 0; i < DistinctAge.size(); i++) {
+				double sum_gpa = 0;
+				double avg_gpa = 0;
+				int counter = 0;
 				
+				for (ManagementAppData singleData : Data) {
+					if (singleData.getAge() == DistinctAge.get(i)) {
+						sum_gpa = sum_gpa + singleData.getGpa();
+						counter++;
+					}
+				}
+				 
+				if (counter != 0 ) { 
+					avg_gpa = sum_gpa / counter;
+					System.out.printf("%-7d %.1f\n", DistinctAge.get(i), avg_gpa);
+				}
+			}
 			
 			statement.close();
-			
 			System.out.println("");
 			
 			
 		} catch (SQLException e) {
-			
 			System.out.println("AvgGpaEachAge error: " + e);
 			e.printStackTrace();
 		}

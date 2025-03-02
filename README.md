@@ -1,18 +1,50 @@
-# UNIBEN FOOD Internship Project
+# UNIBEN FOOD Internship Project - Student Management App
 
-This project was developed as part of my internship at **UNIBEN FOOD**. The primary objective is to gain hands-on experience with **Java**, working with an **H2 database**, and performing queries using Java. The output of these queries is displayed via the command line.
+This project was developed as part of my internship at **UNIBEN FOOD**. It focuses on using **Java** to interact with an **H2 database**, perform queries, and display results via the command line.
 
-## Project Goals
+---
 
-- Learn how to use **Java** for backend development.
-- Integrate an **H2 database** into a Java project.
-- Perform CRUD (Create, Read, Update, Delete) operations on the **H2 database** using Java.
-- Display query results in the **command line**.
+## 📌 Project Overview
 
-## How to Run the Project Locally
+The **Student Management App** is a Java-based console application that interacts with an **H2 database**. It includes two versions:
 
-1. **Clone the Repository**  
-   Open a terminal and run the following command:
+- **Version 1**: `StudentManagementApp.java`
+- **Version 2**: `StudentManagementAppVer2.java`
 
-   ```sh
-   git clone 
+A test file (`StudentManagementAppTest.java`) is included to validate functionality.
+
+---
+
+## ✨ Features
+
+✔ **Java-based** student management system  
+✔ **H2 database** integration for data storage  
+✔ **Command-line interface (CLI)** for interaction  
+✔ **Modular design** with separate data storage handling  
+
+---
+
+## 🚀 Getting Started
+
+### Clone the Repository  
+```sh
+git clone git@github.com:tuanminh25/Student-Management-App.git
+cd Student-Management-App/StudentManangementApp/src/main/java/studentManagementApp
+```
+
+Run the Application
+Version 1:
+```sh
+javac StudentManagementApp.java && java StudentManagementApp
+```
+
+Version 2:
+
+```sh
+javac StudentManagementAppVer2.java && java StudentManagementAppVer2
+```
+
+Run Tests
+```sh
+javac StudentManagementAppTest.java && java StudentManagementAppTest
+```
